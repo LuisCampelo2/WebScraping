@@ -19,51 +19,52 @@ def make_chrome_browser(*options: str) -> webdriver.Chrome:
 
 def switch_elements(soup: BeautifulSoup):
     """Exibe e coleta dados da página de acordo com a escolha do usuário."""
-    while continuar != 's':
+    continuar = 's'
+    limit = 10  # Limite de elementos exibidos
+
+    while continuar == 's':
         element = input('Escolha o que você quer coletar da página:\n'
                         '1. Para coletar imagens, digite 1\n'
                         '2. Para coletar links, digite 2\n'
                         '3. Para coletar textos, digite 3\n')
 
-    # Limite de elementos exibidos
-    limit = 10  
-
-    # Validação da entrada do usuário
-    try:
-        element = int(element)
-    except ValueError:
-        print("Opção inválida! Por favor, insira um número entre 1 e 3.")
-        return
-
-    # Realiza a coleta com base na escolha do usuário
-    match element:
-        case 1:  # Coletar imagens
-            imagens = soup.find_all('img', src=True)
-            if imagens:
-                print(f"Foram encontradas {len(imagens)} imagens. Exibindo as {min(limit, len(imagens))} primeiras:\n")
-                for i, imagem in enumerate(imagens[:limit], 1):
-                    print(f"{i}. URL: {imagem['src']}")
-            else:
-                print('Nenhuma imagem encontrada no site.')
-        case 2:  # Coletar links
-            links = soup.find_all('a', href=True)
-            if links:
-                print(f"Foram encontrados {len(links)} links. Exibindo os {min(limit, len(links))} primeiros:\n")
-                for i, link in enumerate(links[:limit], 1):
-                    print(f"{i}. URL: {link['href']}")
-            else:
-                print('Nenhum link encontrado no site.')
-        case 3:  # Coletar textos
-            textos = soup.find_all('p')
-            if textos:
-                print(f"Foram encontrados {len(textos)} parágrafos de texto. Exibindo os {min(limit, len(textos))} primeiros:\n")
-                for i, texto in enumerate(textos[:limit], 1):
-                    print(f"{i}. Texto: {texto.get_text(strip=True)}")
-            else:
-                print('Nenhum texto encontrado no site.')
-        case _:  # Opção inválida
+        # Validação da entrada do usuário
+        try:
+            element = int(element)
+        except ValueError:
             print("Opção inválida! Por favor, insira um número entre 1 e 3.")
-    continuar=input('quer continuar?s/n')
+            continue
+
+        # Realiza a coleta com base na escolha do usuário
+        match element:
+            case 1:  # Coletar imagens
+                imagens = soup.find_all('img', src=True)
+                if imagens:
+                    print(f"Foram encontradas {len(imagens)} imagens. Exibindo as {min(limit, len(imagens))} primeiras:\n")
+                    for i, imagem in enumerate(imagens[:limit], 1):
+                        print(f"{i}. URL: {imagem['src']}")
+                else:
+                    print('Nenhuma imagem encontrada no site.')
+            case 2:  # Coletar links
+                links = soup.find_all('a', href=True)
+                if links:
+                    print(f"Foram encontrados {len(links)} links. Exibindo os {min(limit, len(links))} primeiros:\n")
+                    for i, link in enumerate(links[:limit], 1):
+                        print(f"{i}. URL: {link['href']}")
+                else:
+                    print('Nenhum link encontrado no site.')
+            case 3:  # Coletar textos
+                textos = soup.find_all('p')
+                if textos:
+                    print(f"Foram encontrados {len(textos)} parágrafos de texto. Exibindo os {min(limit, len(textos))} primeiros:\n")
+                    for i, texto in enumerate(textos[:limit], 1):
+                        print(f"{i}. Texto: {texto.get_text(strip=True)}")
+                else:
+                    print('Nenhum texto encontrado no site.')
+            case _:  # Opção inválida
+                print("Opção inválida! Por favor, insira um número entre 1 e 3.")
+
+        continuar = input('Quer continuar? (s/n): ').strip().lower()
 
 def main():
     # Configuração inicial
@@ -96,6 +97,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
