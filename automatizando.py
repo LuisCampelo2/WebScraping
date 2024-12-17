@@ -3,7 +3,16 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import json
 
+"""
+Este script utiliza Selenium e BeautifulSoup para acessar uma página da web,
+coletar dados (imagens, links ou textos) e exibi-los de forma interativa.
+Ideal para demonstração de habilidades em automação e web scraping.
+"""
+
+
+# Funçao para inicializar o navegador Chrome com as opções fornecidas 
 def make_chrome_browser(*options: str) -> webdriver.Chrome:
     """Inicializa o navegador Chrome com as opções especificadas."""
     chrome_options = webdriver.ChromeOptions()
@@ -17,12 +26,20 @@ def make_chrome_browser(*options: str) -> webdriver.Chrome:
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=chrome_options)
 
+# Função para definir o que sera coletado da página
 def switch_elements(soup: BeautifulSoup):
     """Exibe e coleta dados da página de acordo com a escolha do usuário."""
     continuar = 's'
-    limit = 10  # Limite de elementos exibidos
-
+    resultados={}
     while continuar == 's':
+        limit = input('Qual quantidade voce quer que seja coletada de itens') # Limite de elementos exibidos 
+        # Validação da entrada do usuário
+        try:
+            limit=int(limit)   
+        except ValueError:
+            print('valor digitado tem que ser um valor inteiro')
+            continue
+        #   Definindo o que será coletado
         element = input('Escolha o que você quer coletar da página:\n'
                         '1. Para coletar imagens, digite 1\n'
                         '2. Para coletar links, digite 2\n'
@@ -43,6 +60,9 @@ def switch_elements(soup: BeautifulSoup):
                     print(f"Foram encontradas {len(imagens)} imagens. Exibindo as {min(limit, len(imagens))} primeiras:\n")
                     for i, imagem in enumerate(imagens[:limit], 1):
                         print(f"{i}. URL: {imagem['src']}")
+                    resultados['imagens'] = [
+                        imagem['src'] for imagem in imagens[:limit]
+                    ]
                 else:
                     print('Nenhuma imagem encontrada no site.')
             case 2:  # Coletar links
@@ -51,6 +71,9 @@ def switch_elements(soup: BeautifulSoup):
                     print(f"Foram encontrados {len(links)} links. Exibindo os {min(limit, len(links))} primeiros:\n")
                     for i, link in enumerate(links[:limit], 1):
                         print(f"{i}. URL: {link['href']}")
+                    resultados['links'] = [
+                        link['href'] for link in links[:limit]
+                    ]
                 else:
                     print('Nenhum link encontrado no site.')
             case 3:  # Coletar textos
@@ -59,12 +82,19 @@ def switch_elements(soup: BeautifulSoup):
                     print(f"Foram encontrados {len(textos)} parágrafos de texto. Exibindo os {min(limit, len(textos))} primeiros:\n")
                     for i, texto in enumerate(textos[:limit], 1):
                         print(f"{i}. Texto: {texto.get_text(strip=True)}")
+                    resultados['textos'] = [
+                        texto.get_text(strip=True) for texto in textos[:limit]
+                    ]
                 else:
                     print('Nenhum texto encontrado no site.')
             case _:  # Opção inválida
                 print("Opção inválida! Por favor, insira um número entre 1 e 3.")
 
         continuar = input('Quer continuar? (s/n): ').strip().lower()
+    # Salva os resultados em um arquivo JSON
+    with open('data/output.json', 'w', encoding='utf-8') as json_file:
+        json.dump(resultados, json_file, indent=4, ensure_ascii=False)
+        print("\nOs dados coletados foram salvos no arquivo 'output.json' na pasta Data.")
 
 def main():
     # Configuração inicial
